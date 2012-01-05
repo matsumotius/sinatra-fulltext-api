@@ -35,4 +35,24 @@ describe QueryService do
     query[:attr]["author"].should == @params[:author]
     query[:text][0].should == @params[:text]
   end
+
+  it 'パラメータから検索クエリーをつくる' do
+    keyword_params = { :keyword => "東京 夜 ７ 時" } 
+    text_params    = { :text => "東京は夜の７時" } 
+    query = @query_service.search_from_params(keyword_params)
+    query[:keyword][0].should == "東京"
+    query = @query_service.search_from_params(text_params)
+    query[:keyword][0].should == "東京"
+  end
+
+  it 'パラメータから類似検索クエリーをつくる' do
+    keyword_params = { :key => "東京 夜 ７ 時", :value => "1 2 3 4" } 
+    text_params    = { :text => "東京は夜の７時" } 
+    query = @query_service.similarity_from_params(keyword_params)
+    query[:keyword]["東京"].should == 1
+    query[:keyword]["夜"].should == 2
+    query = @query_service.similarity_from_params(text_params)
+    query[:keyword]["東京"].should == 1
+    query[:keyword]["夜"].should == 1
+  end
 end

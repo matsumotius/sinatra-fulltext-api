@@ -5,6 +5,7 @@ require 'json'
 require File.dirname(__FILE__) + '/../util/response'
 require File.dirname(__FILE__) + '/../util/message'
 require File.dirname(__FILE__) + '/../service/query'
+require File.dirname(__FILE__) + '/../service/parser'
 require File.dirname(__FILE__) + '/../service/memo'
 # module
 include Response
@@ -26,9 +27,10 @@ post '/memo' do
 end
 
 get '/memo' do
-  if params[:keyword]
+  if params[:keyword] or params[:text]
+    @query = QueryService.new
     @memo = MemoService.new
-    response = @memo.search({ :keyword => params[:keyword].strip.split(/\s+/) })
+    response = @memo.search(@query.search_from_params(params))
   else
     response = Response::error({ :message => Message::Error::required_parameter("keyword") })
   end
@@ -36,14 +38,12 @@ get '/memo' do
 end
 
 get '/memo/similarity' do
-  if params[:key] and params[:value]
+  if (params[:key] and params[:value]) or params[:text]
+    @query = QueryService.new
     @memo = MemoService.new
-    keys = params[:key].strip.split(/\s+/)
-    values = params[:value].strip.split(/\s+/)
-    keywords = [keys, values].transpose
-    response = @memo.search_similarity({ :keyword => Hash[*keywords.flatten] })
+    response = @memo.search_similarity(@query.similarity_from_params(params))
   else
-    response = Response::error({ :message => Message::Error::invalid_parameter("id") })
+    response = Response::error({ :message => Message::Error::invalid_parameter("text or keys") })
   end
   response.json
 end

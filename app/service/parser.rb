@@ -9,7 +9,7 @@ class Parser
   def parse(content)
     begin
       nouns = parse_content(content)
-      Response::success({ :noun => nouns, :rank => make_noun_rank(nouns) })
+      Response::success({ :noun => nouns.uniq, :rank => make_noun_rank(nouns) })
     rescue => e
       Response::error({ :message => Message::Error::internal })
     end
