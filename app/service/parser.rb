@@ -29,12 +29,7 @@ class Parser
   end
 
   def make_noun_rank(nouns)
-    rank = []
-    count = make_noun_count(nouns)
-    count.keys.each do |key|
-      rank.push({ :value => key, :count => count[key] })
-    end
-    return rank.sort{|a, b| b[:count] <=> a[:count] }
+    return nouns.inject(Hash.new(0)) {|h, key| h[key] += 1; h }
   end
 
   def make_noun_count(nouns)
